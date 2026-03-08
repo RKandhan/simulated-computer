@@ -1,10 +1,7 @@
-#ifndef CPU_H
-#define CPU_H
+#ifndef DISK_H
+#define DISK_H
 
-void cpu_set_base(int base_addr);
-void fetch_instruction(int addr);
-void execute_instruction();
-int  mem_address(int l_addr);
-int  clock_cycle();
+void  load_prog(char *fname, int addr);
+int*  translate(char *instruction);
 
 #endif
