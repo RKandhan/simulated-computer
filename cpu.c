@@ -30,7 +30,7 @@ Functions:
 #include "memory.h"
 #include "cpu.h"
 
-/* ── Registers ────────────────────────────────────────────────────────────── */
+// Registers
 static int Base = 0;   // Base register
 static int PC   = 0;   // Program Counter
 static int IR0  = 0;   // Instruction Register 0 (OP Code)
@@ -39,7 +39,7 @@ static int AC   = 0;   // Accumulator
 static int MAR  = 0;   // Memory Address Register
 static int MBR  = 0;   // Memory Buffer Register
 
-/* ── OP Code constants ────────────────────────────────────────────────────── */
+// OP Code constants
 #define OP_EXIT          0
 #define OP_LOAD_CONST    1
 #define OP_MOVE_FROM_MBR 2
@@ -55,22 +55,22 @@ static int MBR  = 0;   // Memory Buffer Register
 #define OP_IFGO          12
 #define OP_SLEEP         13
 
-/* ── Public setter used by main.c to set the Base register ────────────────── */
+// Public setter used by main.c to set the Base register
 void cpu_set_base(int base_addr) {
     Base = base_addr;
     PC   = 0;
 }
 
-/* ── mem_address ──────────────────────────────────────────────────────────── */
-/*  Returns the true (absolute) memory address by adding Base to the local    */
-/*  address l_addr.                                                            */
+// mem_address
+/* Returns the true (absolute) memory address by adding Base to the local 
+   address l_addr. */
 int mem_address(int l_addr) {
     return Base + l_addr;
 }
 
-/* ── fetch_instruction ────────────────────────────────────────────────────── */
-/*  Reads the instruction stored at absolute address addr into IR0 (OP Code)  */
-/*  and IR1 (argument).                                                        */
+// fetch_instruction 
+/* Reads the instruction stored at absolute address addr into IR0 (OP Code)
+   and IR1 (argument). */
 void fetch_instruction(int addr) {
     int *data = mem_read(addr);
     if (data == NULL) {
@@ -83,8 +83,8 @@ void fetch_instruction(int addr) {
     IR1 = data[1]; // Argument (0 if none)
 }
 
-/* ── execute_instruction ─────────────────────────────────────────────────── */
-/*  Executes the instruction currently stored in IR0/IR1.                     */
+// execute_instruction
+// Executes the instruction currently stored in IR0/IR1.                     */
 void execute_instruction() {
     int *data;
     int  tmp[2];
@@ -92,36 +92,36 @@ void execute_instruction() {
     switch (IR0) {
 
         case OP_EXIT:
-            /* Handled by clock_cycle() return value; nothing to do here. */
+            // Handled by clock_cycle() return value; nothing to do here. 
             break;
 
         case OP_LOAD_CONST:
-            /* Load the integer argument into the AC register. */
+            // Load the integer argument into the AC register.
             AC = IR1;
             break;
 
         case OP_MOVE_FROM_MBR:
-            /* Copy MBR → AC. */
+            // Copy MBR → AC.
             AC = MBR;
             break;
 
         case OP_MOVE_FROM_MAR:
-            /* Copy MAR → AC. */
+            // Copy MAR → AC.
             AC = MAR;
             break;
 
         case OP_MOVE_TO_MBR:
-            /* Copy AC → MBR. */
+            // Copy AC → MBR.
             MBR = AC;
             break;
 
         case OP_MOVE_TO_MAR:
-            /* Copy AC → MAR. */
+            // Copy AC → MAR.
             MAR = AC;
             break;
 
         case OP_LOAD_AT_ADDR:
-            /* Read memory at address MAR; store the OP Code word into MBR. */
+            // Read memory at address MAR; store the OP Code word into MBR.
             data = mem_read(MAR);
             if (data == NULL) {
                 fprintf(stderr, "Error: load_at_addr failed (MAR=%d)\n", MAR);
@@ -131,29 +131,29 @@ void execute_instruction() {
             break;
 
         case OP_WRITE_AT_ADDR:
-            /* Write MBR into memory at address MAR. */
+            // Write MBR into memory at address MAR.
             tmp[0] = MBR;
             tmp[1] = 0;
             mem_write(MAR, tmp);
             break;
 
         case OP_ADD:
-            /* AC = AC + MBR */
+            // AC = AC + MBR
             AC = AC + MBR;
             break;
 
         case OP_MULTIPLY:
-            /* AC = AC * MBR */
+            // AC = AC * MBR
             AC = AC * MBR;
             break;
 
         case OP_AND:
-            /* Logical AND: 0 is False, non-zero is True. Result in AC. */
+            // Logical AND: 0 is False, non-zero is True. Result in AC.
             AC = (AC != 0 && MBR != 0) ? 1 : 0;
             break;
 
         case OP_OR:
-            /* Logical OR: 0 is False, non-zero is True. Result in AC. */
+            // Logical OR: 0 is False, non-zero is True. Result in AC.
             AC = (AC != 0 || MBR != 0) ? 1 : 0;
             break;
 
@@ -166,7 +166,7 @@ void execute_instruction() {
             break;
 
         case OP_SLEEP:
-            /* Do nothing. */
+            // Do nothing.
             break;
 
         default:
@@ -175,9 +175,9 @@ void execute_instruction() {
     }
 }
 
-/* ── clock_cycle ─────────────────────────────────────────────────────────── */
-/*  Performs one full fetch-execute cycle.                                    */
-/*  Returns 0 when the exit instruction is encountered, 1 otherwise.         */
+// clock_cycle 
+/*  Performs one full fetch-execute cycle. Returns 0 when the exit instruction 
+    is encountered, 1 otherwise. */
 int clock_cycle() {
     int abs_addr = mem_address(PC);
 
